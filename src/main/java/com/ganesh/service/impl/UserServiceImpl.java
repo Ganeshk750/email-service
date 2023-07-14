@@ -18,7 +18,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User saveUser(User user) {
-        if(userRepository.existByEmail(user.getEmail())) {throw new RuntimeException("Email already exists");}
+        if(userRepository.existsByEmail(user.getEmail())) {throw new RuntimeException("Email already exists");}
            user.setEnabled(false);
            userRepository.save(user);
            Confirmation confirmation = new Confirmation(user);
