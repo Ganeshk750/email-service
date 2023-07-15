@@ -1,7 +1,7 @@
 # email-service
 Send Emails With Spring Boot
 
-##### 1. New Add User
+##### 1. Add User
 ###### POST
 ``http://localhost:9000/v1/api/users ``
 ###### REQUEST BODY
