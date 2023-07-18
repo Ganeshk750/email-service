@@ -4,6 +4,7 @@ import com.ganesh.entity.Confirmation;
 import com.ganesh.entity.User;
 import com.ganesh.repository.ConfirmationRepository;
 import com.ganesh.repository.UserRepository;
+import com.ganesh.service.EmailService;
 import com.ganesh.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,8 @@ public class UserServiceImpl implements UserService {
 
     private final ConfirmationRepository confirmationRepository;
 
+    private final EmailService emailService;
+
     @Override
     public User saveUser(User user) {
         if(userRepository.existsByEmail(user.getEmail())) {throw new RuntimeException("Email already exists");}
@@ -25,6 +28,8 @@ public class UserServiceImpl implements UserService {
            confirmationRepository.save(confirmation);
 
         /** To Send email to user with token **/
+        emailService.simpleMailMessage(user.getName(), user.getEmail(), confirmation.getToken());
+
         return user;
     }
 
