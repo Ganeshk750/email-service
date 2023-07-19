@@ -1,6 +1,7 @@
 package com.ganesh.service.impl;
 
 import com.ganesh.service.EmailService;
+import com.ganesh.utils.EmailUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -26,7 +27,8 @@ public class EmailServiceImpl implements EmailService {
            message.setSubject("New User Account Verification");
            message.setFrom(fromEmail);
            message.setTo(to);
-           message.setText("Hey This is SimpleMailMessage Testing.");
+          // message.setText("Hey This is SimpleMailMessage Testing.");
+           message.setText(EmailUtils.getEmailMessage(name, host, token));
            emailSender.send(message);
        }catch (Exception exception){
            System.out.println(exception.getMessage());
