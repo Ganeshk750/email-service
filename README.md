@@ -31,3 +31,9 @@ Send Emails With Spring Boot
     }
 }
 ````
+
+###### TO INCREASE THE PERFORMANCE OF RESPONSE
+````
+1. @EnableAsync --> To Enable Async Comm App Level.
+2. @Async --> Used For Method level. i.e that methods run independent process or seprate threads.
+````
