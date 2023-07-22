@@ -48,32 +48,51 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async
     public void sendMimeMessageWithAttachments(String name, String to, String token) {
-       try {
-           MimeMessage message = getMimeMessage();
-           MimeMessageHelper helper = new MimeMessageHelper(message, true,UTF_8_ENCODING);
-           helper.setPriority(1);
-           helper.setSubject("New User Account Verification");
-           helper.setFrom(fromEmail);
-           helper.setTo(to);
-           helper.setText(EmailUtils.getEmailMessage(name, host,token));
-           // Add Attachment form file system
-           FileSystemResource first = new FileSystemResource(new File(System.getProperty("user.home") + "/Downloads/images/first.png"));
-           FileSystemResource second = new FileSystemResource(new File(System.getProperty("user.home") + "/Downloads/images/second.png"));
-           FileSystemResource third = new FileSystemResource(new File(System.getProperty("user.home") + "/Downloads/images/third.rtf"));
-           helper.addAttachment(first.getFilename(), first);
-           helper.addAttachment(second.getFilename(), second);
-           helper.addAttachment(third.getFilename(), third);
-           emailSender.send(message);
-       }catch (Exception exception){
-           System.out.println(exception.getMessage());
-           throw new RuntimeException(exception.getMessage());
-       }
+        try {
+            MimeMessage message = getMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, UTF_8_ENCODING);
+            helper.setPriority(1);
+            helper.setSubject("New User Account Verification");
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setText(EmailUtils.getEmailMessage(name, host, token));
+            // Add Attachment form file system
+            FileSystemResource first = new FileSystemResource(new File(System.getProperty("user.home") + "/Downloads/images/first.png"));
+            FileSystemResource second = new FileSystemResource(new File(System.getProperty("user.home") + "/Downloads/images/second.png"));
+            FileSystemResource third = new FileSystemResource(new File(System.getProperty("user.home") + "/Downloads/images/third.rtf"));
+            helper.addAttachment(first.getFilename(), first);
+            helper.addAttachment(second.getFilename(), second);
+            helper.addAttachment(third.getFilename(), third);
+            emailSender.send(message);
+        } catch (Exception exception) {
+            System.out.println(exception.getMessage());
+            throw new RuntimeException(exception.getMessage());
+        }
     }
 
     @Override
     @Async
     public void sendMimeMessageWithEmbeddedImages(String name, String to, String token) {
-
+        try {
+            MimeMessage message = getMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, UTF_8_ENCODING);
+            helper.setPriority(1);
+            helper.setSubject("New User Account Verification");
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setText(EmailUtils.getEmailMessage(name, host, token));
+            // Add Attachment form file system
+            FileSystemResource first = new FileSystemResource(new File(System.getProperty("user.home") + "/Downloads/images/first.png"));
+            FileSystemResource second = new FileSystemResource(new File(System.getProperty("user.home") + "/Downloads/images/second.png"));
+            FileSystemResource third = new FileSystemResource(new File(System.getProperty("user.home") + "/Downloads/images/third.rtf"));
+            helper.addInline(getContentId(first.getFilename()), first);
+            helper.addInline(getContentId(second.getFilename()), second);
+            helper.addInline(getContentId(third.getFilename()), third);
+            emailSender.send(message);
+        } catch (Exception exception) {
+            System.out.println(exception.getMessage());
+            throw new RuntimeException(exception.getMessage());
+        }
     }
 
     @Override
@@ -96,5 +115,9 @@ public class EmailServiceImpl implements EmailService {
 
     private MimeMessage getMimeMessage() {
         return emailSender.createMimeMessage();
+    }
+
+    private String getContentId(String fileName){
+      return "<" + fileName + ">";
     }
 }
