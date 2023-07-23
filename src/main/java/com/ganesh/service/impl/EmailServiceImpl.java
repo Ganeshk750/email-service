@@ -11,14 +11,20 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.io.File;
+import java.util.Map;
+
+import static com.ganesh.utils.EmailUtils.getVerificationUrl;
 
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
     public static final String UTF_8_ENCODING = "UTF-8";
+    public static final String EMAIL_TEMPLATE = "emailTemplate";
     @Value("${spring.mail.verify.host}")
     private String host;
 
@@ -26,6 +32,8 @@ public class EmailServiceImpl implements EmailService {
     private String fromEmail;
 
     private final JavaMailSender emailSender;
+
+    private final TemplateEngine templateEngine;
 
     @Override
     @Async
@@ -104,7 +112,24 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async
     public void sendHtmlEmail(String name, String to, String token) {
-
+        try {
+            Context context = new Context();
+           // context.setVariable("name", name);
+           // context.setVariable("url", getVerificationUrl(host, token));
+            context.setVariables(Map.of("name", name, "url", getVerificationUrl(host, token)));
+            String text = templateEngine.process(EMAIL_TEMPLATE, context);
+            MimeMessage message = getMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, UTF_8_ENCODING);
+            helper.setPriority(1);
+            helper.setSubject("New User Account Verification");
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setText(text, true);
+            emailSender.send(message);
+        } catch (Exception exception) {
+            System.out.println(exception.getMessage());
+            throw new RuntimeException(exception.getMessage());
+        }
     }
 
     @Override
