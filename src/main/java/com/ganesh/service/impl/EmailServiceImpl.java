@@ -105,12 +105,6 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     @Async
-    public void sendMimeMessageWithEmbeddedFiles(String name, String to, String token) {
-
-    }
-
-    @Override
-    @Async
     public void sendHtmlEmail(String name, String to, String token) {
         try {
             Context context = new Context();
@@ -125,6 +119,34 @@ public class EmailServiceImpl implements EmailService {
             helper.setFrom(fromEmail);
             helper.setTo(to);
             helper.setText(text, true);
+            emailSender.send(message);
+        } catch (Exception exception) {
+            System.out.println(exception.getMessage());
+            throw new RuntimeException(exception.getMessage());
+        }
+    }
+
+    @Override
+    @Async
+    public void sendHtmlWithAttachment(String name, String to, String token) {
+        try {
+            Context context = new Context();
+            context.setVariables(Map.of("name", name, "url", getVerificationUrl(host, token)));
+            String text = templateEngine.process(EMAIL_TEMPLATE, context);
+            MimeMessage message = getMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, UTF_8_ENCODING);
+            helper.setPriority(1);
+            helper.setSubject("New User Account Verification");
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setText(text, true);
+            // Add Attachment form file system
+            FileSystemResource first = new FileSystemResource(new File(System.getProperty("user.home") + "/Downloads/images/first.png"));
+            FileSystemResource second = new FileSystemResource(new File(System.getProperty("user.home") + "/Downloads/images/second.png"));
+            FileSystemResource third = new FileSystemResource(new File(System.getProperty("user.home") + "/Downloads/images/third.rtf"));
+            helper.addInline(getContentId(first.getFilename()), first);
+            helper.addInline(getContentId(second.getFilename()), second);
+            helper.addInline(getContentId(third.getFilename()), third);
             emailSender.send(message);
         } catch (Exception exception) {
             System.out.println(exception.getMessage());
