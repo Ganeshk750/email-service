@@ -3,6 +3,13 @@ package com.ganesh.service.impl;
 import com.ganesh.service.EmailService;
 import com.ganesh.utils.EmailUtils;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.activation.DataHandler;
+import jakarta.activation.DataSource;
+import jakarta.activation.FileDataSource;
+import jakarta.mail.BodyPart;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -25,6 +32,8 @@ public class EmailServiceImpl implements EmailService {
 
     public static final String UTF_8_ENCODING = "UTF-8";
     public static final String EMAIL_TEMPLATE = "emailTemplate";
+    public static final String TEXT_HTML_ENCONDING = "text/html";
+    public static final String NEW_USER_ACCOUNT_VERIFICATION = "New User Account Verification";
     @Value("${spring.mail.verify.host}")
     private String host;
 
@@ -157,7 +166,36 @@ public class EmailServiceImpl implements EmailService {
     @Override
     @Async
     public void sendHtmlEmailWithEmbeddedFiles(String name, String to, String token) {
+        try {
+            MimeMessage message = getMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, UTF_8_ENCODING);
+            helper.setPriority(1);
+            helper.setSubject(NEW_USER_ACCOUNT_VERIFICATION);
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            //helper.setText(text, true);
+            Context context = new Context();
+            context.setVariables(Map.of("name", name, "url", getVerificationUrl(host, token)));
+            String text = templateEngine.process(EMAIL_TEMPLATE, context);
 
+            // Add HTML email body
+            MimeMultipart mimeMultipart = new MimeMultipart("related");
+            BodyPart messageBodyPart = new MimeBodyPart();
+            messageBodyPart.setContent(text, TEXT_HTML_ENCONDING);
+            mimeMultipart.addBodyPart(messageBodyPart);
+
+            // Add images to the email body
+            BodyPart imageBodyPart = new MimeBodyPart();
+            DataSource dataSource = new FileDataSource(System.getProperty("user.home") + "/Downloads/images/first.png");
+            imageBodyPart.setDataHandler(new DataHandler(dataSource));
+            imageBodyPart.setHeader("Content-ID", "image");
+            mimeMultipart.addBodyPart(imageBodyPart);
+
+            emailSender.send(message);
+        } catch (Exception exception) {
+            System.out.println(exception.getMessage());
+            throw new RuntimeException(exception.getMessage());
+        }
     }
 
     private MimeMessage getMimeMessage() {
