@@ -191,6 +191,9 @@ public class EmailServiceImpl implements EmailService {
             imageBodyPart.setHeader("Content-ID", "image");
             mimeMultipart.addBodyPart(imageBodyPart);
 
+            // Add mimeMessage
+            message.setContent(mimeMultipart);
+
             emailSender.send(message);
         } catch (Exception exception) {
             System.out.println(exception.getMessage());
